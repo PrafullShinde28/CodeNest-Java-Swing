@@ -1,0 +1,39 @@
+// ===== TEST CASES =====
+package com.codenest;
+
+import com.codenest.model.User;
+import org.junit.Test;
+import org.junit.Before;
+import static org.junit.Assert.*;
+
+public class UserServiceTest {
+    private UserService userService;
+    
+    @Before
+    public void setUp() {
+        userService = new UserService();
+    }
+    
+    @Test
+    public void testUserRegistration() {
+        User user = new User("Test User", "test@example.com", "password123", User.Role.STUDENT);
+        
+        try {
+            boolean result = userService.registerUser(user);
+            assertTrue("User registration should succeed", result);
+        } catch (Exception e) {
+            fail("Registration should not throw exception: " + e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testUserAuthentication() {
+        try {
+            User user = userService.authenticate("admin@codenest.com", "admin123");
+            assertNotNull("Authentication should return user", user);
+            assertEquals("User role should be ADMIN", User.Role.ADMIN, user.getRole());
+        } catch (Exception e) {
+            fail("Authentication should not throw exception: " + e.getMessage());
+        }
+    }
+}

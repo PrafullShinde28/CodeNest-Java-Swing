@@ -1,0 +1,17 @@
+# Application configuration 
+# application.properties
+# Database Configuration
+db.url=jdbc:mysql://localhost:3306/codenest_db
+db.username=codenest_user
+db.password=secure_password
+db.pool.max.size=10
+
+# Application Configuration
+app.name=CodeNest
+app.version=1.0.0
+jwt.secret=your_jwt_secret_key
+session.timeout=1800
+
+# UI Configuration
+ui.theme=default
+ui.font.size=12

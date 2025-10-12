@@ -1,0 +1,5 @@
+package com.codenest.util;
+
+public class SessionManager {
+
+}
