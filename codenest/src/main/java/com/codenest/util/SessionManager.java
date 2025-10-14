@@ -23,8 +23,13 @@ public class SessionManager {
         this.currentUser = null;
     }
     
+
     public User getCurrentUser() {
         return currentUser;
+    }
+
+    public int getCurrentUserId() {
+        return currentUser != null ? currentUser.getId().intValue() : -1;
     }
     
     public boolean isLoggedIn() {

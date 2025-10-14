@@ -9,6 +9,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
+import com.codenest.ui.CommunityPanel;
+
 
 public class StudentDashboard extends JFrame {
     private User currentUser;
@@ -43,7 +45,9 @@ public class StudentDashboard extends JFrame {
         tabbedPane.addTab("Quiz", createQuizPanel());
         
         // Community tab
-        tabbedPane.addTab("Community", createCommunityPanel());
+        tabbedPane.addTab("Community", new CommunityPanel(currentUser));
+
+
         
         add(tabbedPane);
     }
