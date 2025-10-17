@@ -130,7 +130,19 @@ public class DatabaseUtil {
                 FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
                 FOREIGN KEY (problem_id) REFERENCES problems(id) ON DELETE CASCADE
             )
+            """,
+            //
             """
+            CREATE TABLE IF NOT EXISTS community_members (
+                    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                    community_id BIGINT NOT NULL,
+                    user_id BIGINT NOT NULL,
+                    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                    UNIQUE (community_id, user_id)
+                )
+            """,
         };
         
         for (String sql : createTableSQL) {

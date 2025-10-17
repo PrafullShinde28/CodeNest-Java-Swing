@@ -1,4 +1,3 @@
-// ===== Update CommunityService.java with additional methods =====
 package com.codenest.service;
 
 import com.codenest.dao.CommunityDAO;

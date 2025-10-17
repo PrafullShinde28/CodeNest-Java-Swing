@@ -30,7 +30,7 @@ public class ConfigManager {
     private static void setDefaultProperties() {
         properties.setProperty("db.url", "jdbc:mysql://localhost:3306/codenest_db");
         properties.setProperty("db.username", "root");
-        properties.setProperty("db.password", "password");
+        properties.setProperty("db.password", "manager");
         properties.setProperty("app.title", "CodeNest - Student Service Platform");
         properties.setProperty("app.version", "1.0.0");
     }

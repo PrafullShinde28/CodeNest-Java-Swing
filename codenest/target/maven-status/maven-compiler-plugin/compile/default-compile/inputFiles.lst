@@ -23,7 +23,9 @@ D:\CodeNest(Workspace-Eclipse)\codenest\src\main\java\com\codenest\util\ConfigMa
 D:\CodeNest(Workspace-Eclipse)\codenest\src\main\java\com\codenest\ui\dialog\CommunityDetailsDialog.java
 D:\CodeNest(Workspace-Eclipse)\codenest\src\main\java\com\codenest\ui\dialog\CreatePostDialog.java
 D:\CodeNest(Workspace-Eclipse)\codenest\src\main\java\com\codenest\controller\AuthController.java
+D:\CodeNest(Workspace-Eclipse)\codenest\src\main\java\com\codenest\ui\dialog\ViewPostingDialog.java
 D:\CodeNest(Workspace-Eclipse)\codenest\src\main\java\com\codenest\ui\RegistrationWindow.java
+D:\CodeNest(Workspace-Eclipse)\codenest\src\main\java\com\codenest\ui\ViewPostDialog.java
 D:\CodeNest(Workspace-Eclipse)\codenest\src\main\java\com\codenest\service\ProblemService.java
 D:\CodeNest(Workspace-Eclipse)\codenest\src\main\java\com\codenest\dao\BaseDAO.java
 D:\CodeNest(Workspace-Eclipse)\codenest\src\main\java\com\codenest\service\CommunityService.java
