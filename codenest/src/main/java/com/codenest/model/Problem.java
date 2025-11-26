@@ -12,9 +12,52 @@ public class Problem {
     }
     
     public enum Pattern {
-        ARRAYS, STRINGS, TREES, GRAPHS, DYNAMIC_PROGRAMMING, SORTING, SEARCHING
-    }
-    
+ARRAYS,
+
+LINKED_LISTS,
+
+TREES,
+
+GRAPHS,
+
+STACKS,
+
+QUEUES,
+
+HASHMAP,
+
+HEAPS,
+
+SORTING,
+
+STRINGS,
+
+MATH,
+
+DYNAMIC_PROGRAMMING,
+
+BACKTRACKING,
+
+TRIE,
+
+GRIDS,
+
+SEARCHING,
+
+BFS,
+
+DFS,
+
+PROBABILITY,
+
+GREEDY,
+
+BIT_MANIPULATION,
+
+DESIGN
+
+}
+
     // Constructors
     public Problem() {}
     

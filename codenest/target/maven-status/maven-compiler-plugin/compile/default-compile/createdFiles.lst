@@ -9,6 +9,7 @@ com\codenest\dao\QuizDAO.class
 com\codenest\dao\UserDAO.class
 com\codenest\ui\AdminDashboard.class
 com\codenest\ui\CommunityPanel.class
+com\codenest\ui\StudentDashboard$1.class
 com\codenest\ui\CommunityPanel$CommunityListRenderer.class
 com\codenest\ui\RegistrationWindow$RegisterActionListener.class
 com\codenest\model\Post.class

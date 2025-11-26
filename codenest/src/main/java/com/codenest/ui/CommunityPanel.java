@@ -34,26 +34,21 @@ public class CommunityPanel extends JPanel {
     private CommunityService communityService;
     private User currentUser;
 
-    // === Constructors ===
-    public CommunityPanel() {
-        this.communityService = new CommunityService();
-        this.communityController = new CommunityController();
-        initializeComponents();
-        setupLayout();
-        setupEventHandlers();
-        loadCommunities();
-    }
+ public CommunityPanel(User user) {
+    this.currentUser = user;
 
-    public CommunityPanel(User user) {
-        this.currentUser = user;
-        this.communityService = new CommunityService();
-        this.communityController = new CommunityController();
-        initializeComponents();
-        setupLayout();
-        setupEventHandlers();
-        loadCommunities();
-    }
+    SessionManager.getInstance().login(user);
 
+    this.communityService = new CommunityService();
+    this.communityController = new CommunityController();
+    initializeComponents();
+    setupLayout();
+    setupEventHandlers();
+    loadCommunities();
+}
+
+
+    
     // === Initialization ===
     private void initializeComponents() {
         communityListModel = new DefaultListModel<>();
@@ -349,12 +344,22 @@ public class CommunityPanel extends JPanel {
         dialog.setVisible(true);
     }
 
-    private void deletePost(Post post) {
-        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this post?", "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (confirm == JOptionPane.YES_OPTION) {
-            if (communityController.deletePost(post.getId())) loadPosts(selectedCommunity.getId().intValue());
-        }
+   private void deletePost(Post post) {
+    int confirm = JOptionPane.showConfirmDialog(
+        this,
+        "Are you sure you want to delete this post?",
+        "Confirm Delete",
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.WARNING_MESSAGE
+    );
+
+    if (confirm == JOptionPane.YES_OPTION) {
+        // Convert Long to int only if your controller still expects int
+        communityController.deletePost(post.getId().intValue());
+        loadPosts(selectedCommunity.getId().intValue());
     }
+}
+
 
     // === Renderer ===
     private class CommunityListRenderer extends DefaultListCellRenderer {

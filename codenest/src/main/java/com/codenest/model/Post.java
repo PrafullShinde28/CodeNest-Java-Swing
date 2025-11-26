@@ -3,10 +3,10 @@ package com.codenest.model;
 import java.time.LocalDateTime;
 
 public class Post {
-    private int id;
-    private int communityId;   // corresponds to community_id in DB
-    private int authorId;      // corresponds to user_id in DB
-    private String authorName; // fetched from users table JOIN
+    private Long id;
+    private Long communityId;   // corresponds to community_id in DB
+    private Long authorId;      // corresponds to user_id in DB
+    private String authorName;  // fetched from users table JOIN
     private String title;
     private String content;
     private LocalDateTime createdAt;
@@ -19,7 +19,7 @@ public class Post {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Post(int communityId, int authorId, String title, String content) {
+    public Post(Long communityId, Long authorId, String title, String content) {
         this.communityId = communityId;
         this.authorId = authorId;
         this.title = title;
@@ -30,27 +30,27 @@ public class Post {
 
     // ---------------- Getters & Setters ----------------
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public int getCommunityId() {
+    public Long getCommunityId() {
         return communityId;
     }
 
-    public void setCommunityId(int communityId) {
+    public void setCommunityId(Long communityId) {
         this.communityId = communityId;
     }
 
-    public int getAuthorId() {
+    public Long getAuthorId() {
         return authorId;
     }
 
-    public void setAuthorId(int authorId) {
+    public void setAuthorId(Long authorId) {
         this.authorId = authorId;
     }
 

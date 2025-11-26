@@ -1,5 +1,5 @@
 package com.codenest.dao;
-
+import com.codenest.util.DatabaseUtil;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -7,9 +7,9 @@ import java.sql.SQLException;
 
 public abstract class BaseDAO {
     protected Connection getConnection() throws SQLException {
-        String url = "jdbc:mysql://localhost:3306/your_database";
-        String user = "your_username";
-        String password = "your_password";
+        String url = "jdbc:mysql://localhost:3306/codenest_db";
+        String user = "root";
+        String password = "manager";
         return DriverManager.getConnection(url, user, password);
     }
 
