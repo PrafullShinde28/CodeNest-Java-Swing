@@ -1,17 +1,17 @@
 package com.codenest.ui;
-import com.codenest.util.SessionManager;
 
 import com.codenest.controller.ProblemController;
 import com.codenest.controller.QuizController;
 import com.codenest.model.User;
 import com.codenest.model.Problem;
 import com.codenest.model.Quiz;
+import com.codenest.util.SessionManager;
+
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import com.codenest.ui.CommunityPanel;
 
 public class StudentDashboard extends JFrame {
     private User currentUser;
@@ -23,13 +23,13 @@ public class StudentDashboard extends JFrame {
     // Filtering-related fields
     private List<Problem> allProblems = new ArrayList<>();
     private DefaultListModel<Problem> problemListModel = new DefaultListModel<>();
-    private JList<Problem> problemsList;             // will be set in createProgrammingPanel
-    private JComboBox<String> difficultyFilter;      // will be set in createProgrammingPanel
-    private JComboBox<String> patternFilter;         // will be set in createProgrammingPanel
-    private JTextArea problemDetails;                // reuse the details area
+    private JList<Problem> problemsList;
+    private JComboBox<String> difficultyFilter;
+    private JComboBox<String> patternFilter;
+    private JTextArea problemDetails;
 
     // split pane and controls
-    private JSplitPane split;                  // make split pane a field
+    private JSplitPane split;
     private JSlider dividerSlider;
     private JSpinner dividerSpinner;
     private JLabel dividerLabel;
@@ -38,23 +38,30 @@ public class StudentDashboard extends JFrame {
     private static final String PREF_DIVIDER = "problems_split_percent";
     private java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(StudentDashboard.class);
 
-  public StudentDashboard(User user) {
-    this.currentUser = user;
+    public StudentDashboard(User user) {
+        // set session so services/controllers can read current user
+        if (user != null) {
+            SessionManager.getInstance().login(user);
+        }
+        this.currentUser = user;
 
-    // ⭐ REQUIRED FIX ⭐
-    SessionManager.getInstance().login(user);
+        this.problemController = new ProblemController();
+        this.quizController = new QuizController();
 
-    this.problemController = new ProblemController();
-    this.quizController = new QuizController();
-    initializeComponents();
-    updateDashboardStats();
-}
+        initializeComponents();
+        updateDashboardStats();
 
+        // load problems after UI created (wires filter listeners inside)
+        initMyFiltering();
+    }
 
     private void initializeComponents() {
         setTitle("CodeNest - Student Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+        // Use BorderLayout so we can add a menu and center content.
+        setLayout(new BorderLayout());
 
         // Create tabbed pane
         JTabbedPane tabbedPane = new JTabbedPane();
@@ -71,7 +78,75 @@ public class StudentDashboard extends JFrame {
         // Community tab
         tabbedPane.addTab("Community", new CommunityPanel(currentUser));
 
-        add(tabbedPane);
+        // Add the tabbed pane to the center of the frame
+        add(tabbedPane, BorderLayout.CENTER);
+
+        // Add the logout menu (menu bar) to the frame
+          addTopRightLogoutButton();
+    }
+            private void addTopRightLogoutButton() {
+            JPanel topBar = new JPanel(new BorderLayout());
+            topBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+            JLabel title = new JLabel("CodeNest - Student Dashboard");
+            title.setFont(new Font("Arial", Font.BOLD, 16));
+
+            JButton logoutButton = new JButton("Logout");
+            logoutButton.addActionListener(e -> {
+                int confirm = JOptionPane.showConfirmDialog(
+                        StudentDashboard.this,
+                        "Are you sure you want to logout?",
+                        "Confirm Logout",
+                        JOptionPane.YES_NO_OPTION);
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    SessionManager.getInstance().logout();
+
+                    SwingUtilities.invokeLater(() -> {
+                        dispose();
+                        LoginWindow login = new LoginWindow();
+                        login.setVisible(true);
+                    });
+                }
+            });
+
+            topBar.add(title, BorderLayout.WEST);
+            topBar.add(logoutButton, BorderLayout.EAST);
+
+            add(topBar, BorderLayout.NORTH);
+        }
+
+    private void addLogoutMenu() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu accountMenu = new JMenu("Account");
+
+        JMenuItem logoutItem = new JMenuItem("Logout");
+        logoutItem.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(
+                    StudentDashboard.this,
+                    "Are you sure you want to logout?",
+                    "Confirm Logout",
+                    JOptionPane.YES_NO_OPTION);
+
+            if (confirm != JOptionPane.YES_OPTION) return;
+
+            // Clear session
+            SessionManager.getInstance().logout();
+            System.out.println("DEBUG: logged out, currentUserId=" + SessionManager.getInstance().getCurrentUserId());
+
+            // Dispose dashboard and open login window on EDT
+            SwingUtilities.invokeLater(() -> {
+                StudentDashboard.this.dispose();
+                LoginWindow login = new LoginWindow();
+                login.setVisible(true);
+                login.toFront();
+                login.requestFocus();
+            });
+        });
+
+        accountMenu.add(logoutItem);
+        menuBar.add(accountMenu);
+        setJMenuBar(menuBar);
     }
 
     private JPanel createDashboardPanel() {
@@ -80,7 +155,7 @@ public class StudentDashboard extends JFrame {
 
         // Welcome panel
         JPanel welcomePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel welcomeLabel = new JLabel("Welcome, " + currentUser.getName() + "!");
+        JLabel welcomeLabel = new JLabel("Welcome, " + (currentUser != null ? currentUser.getName() : "Guest") + "!");
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 24));
         welcomePanel.add(welcomeLabel);
 
@@ -105,17 +180,17 @@ public class StudentDashboard extends JFrame {
         statsPanel.add(streakLabel);
         statsPanel.add(badgesLabel);
 
-        // Leaderboard panel
+        // Leaderboard (placeholder static table)
         JPanel leaderboardPanel = new JPanel(new BorderLayout());
         leaderboardPanel.setBorder(BorderFactory.createTitledBorder("Leaderboard"));
 
         String[] columnNames = {"Rank", "Name", "Score"};
         String[][] data = {
-            {"1", "Alice Smith", "850"},
-            {"2", "Bob Johnson", "720"},
-            {"3", currentUser.getName(), "650"},
-            {"4", "Carol Brown", "580"},
-            {"5", "David Wilson", "520"}
+                {"1", "Alice Smith", "850"},
+                {"2", "Bob Johnson", "720"},
+                {"3", currentUser != null ? currentUser.getName() : "You", "650"},
+                {"4", "Carol Brown", "580"},
+                {"5", "David Wilson", "520"}
         };
 
         JTable leaderboardTable = new JTable(data, columnNames);
@@ -138,9 +213,8 @@ public class StudentDashboard extends JFrame {
         filterPanel.add(new JLabel("Filter by:"));
 
         difficultyFilter = new JComboBox<>(new String[]{"All", "EASY", "MEDIUM", "HARD"});
-        // use the same enum names (EASY etc) to match Problem.Difficulty
         patternFilter = new JComboBox<>(new String[]{
-            "All", "ARRAYS", "STRINGS", "TREES", "GRAPHS", "DYNAMIC_PROGRAMMING"
+                "All", "ARRAYS", "STRINGS", "TREES", "GRAPHS", "DYNAMIC_PROGRAMMING"
         });
 
         filterPanel.add(new JLabel("Difficulty:"));
@@ -148,28 +222,22 @@ public class StudentDashboard extends JFrame {
         filterPanel.add(new JLabel("Pattern:"));
         filterPanel.add(patternFilter);
 
-        // --- Divider controls (user chooses left pane percentage) ---
+        // Divider controls
         dividerLabel = new JLabel("Left pane:");
-
-        // Slider 10..90 (initial value loaded from prefs or default 40)
         int initialPercent = prefs.getInt(PREF_DIVIDER, 40);
-        dividerSlider = new JSlider(10, 90, initialPercent); // limit extremes to keep UI usable
+        dividerSlider = new JSlider(10, 90, initialPercent);
         dividerSlider.setMajorTickSpacing(10);
         dividerSlider.setPaintTicks(true);
-        dividerSlider.setSnapToTicks(false); // smooth change
 
-        // Spinner to show exact percent and allow typing
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(initialPercent, 10, 90, 1);
         dividerSpinner = new JSpinner(spinnerModel);
 
-        // Put them compactly in a small panel
         JPanel dividerControlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         dividerControlPanel.add(dividerLabel);
         dividerControlPanel.add(dividerSlider);
         dividerControlPanel.add(dividerSpinner);
 
-        // Add to filter panel (after existing filter items)
-        filterPanel.add(new JLabel(" | ")); // small separator
+        filterPanel.add(new JLabel(" | "));
         filterPanel.add(dividerControlPanel);
 
         // Problems list (use model of Problems)
@@ -198,10 +266,8 @@ public class StudentDashboard extends JFrame {
         problemDetails.setEditable(false);
         problemDetails.setWrapStyleWord(true);
         problemDetails.setLineWrap(true);
-        // initial border/title
         problemDetails.setBorder(BorderFactory.createTitledBorder("Select a problem"));
 
-        // Create scroll panes
         JScrollPane problemsListScroll = new JScrollPane(problemsList);
         problemsListScroll.setPreferredSize(new Dimension(350, 600));
         problemsListScroll.setMinimumSize(new Dimension(200, 100));
@@ -221,20 +287,16 @@ public class StudentDashboard extends JFrame {
         solveButton.addActionListener(e -> {
             Problem selected = problemsList.getSelectedValue();
             if (selected != null) {
-                markProblemAsSolved(selected.getId()); // ensure Problem.id is set by controller
+                markProblemAsSolved(selected.getId());
                 updateDashboardStats();
             }
         });
 
-        // Put solve button under details by using a small wrapper panel to preserve layout
         JPanel rightWrapper = new JPanel(new BorderLayout());
         rightWrapper.add(detailsScroll, BorderLayout.CENTER);
         rightWrapper.add(solveButton, BorderLayout.SOUTH);
-
-        // Replace split's right component with rightWrapper to include the button
         split.setRightComponent(rightWrapper);
 
-        // List selection listener
         problemsList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 Problem selected = problemsList.getSelectedValue();
@@ -252,25 +314,18 @@ public class StudentDashboard extends JFrame {
         panel.add(filterPanel, BorderLayout.NORTH);
         panel.add(problemsPanel, BorderLayout.CENTER);
 
-        // Initialize filtering (loads problems and wires combo boxes)
-        initMyFiltering();
-
         // Wire slider & spinner to update split live and persist preference
         ChangeListener sliderSpinnerListener = ev -> {
             int v = dividerSlider.getValue();
-            // keep spinner and slider in sync
             if ((int) dividerSpinner.getValue() != v) dividerSpinner.setValue(v);
             split.setDividerLocation(v / 100.0);
         };
         dividerSlider.addChangeListener(sliderSpinnerListener);
-
         dividerSpinner.addChangeListener(ev -> {
             int v = (Integer) dividerSpinner.getValue();
             if (dividerSlider.getValue() != v) dividerSlider.setValue(v);
             split.setDividerLocation(v / 100.0);
         });
-
-        // persist after slider finished adjusting
         dividerSlider.addChangeListener(e -> {
             if (!dividerSlider.getValueIsAdjusting()) {
                 prefs.putInt(PREF_DIVIDER, dividerSlider.getValue());
@@ -292,7 +347,6 @@ public class StudentDashboard extends JFrame {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titlePanel.add(titleLabel);
 
-        // Quiz list
         DefaultListModel<String> quizListModel = new DefaultListModel<>();
         JList<String> quizList = new JList<>(quizListModel);
 
@@ -312,28 +366,6 @@ public class StudentDashboard extends JFrame {
         panel.add(titlePanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(quizList), BorderLayout.CENTER);
         panel.add(buttonPanel, BorderLayout.SOUTH);
-
-        return panel;
-    }
-
-    private JPanel createCommunityPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        JLabel titleLabel = new JLabel("Community Features");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
-
-        JTextArea communityInfo = new JTextArea();
-        communityInfo.setEditable(false);
-        communityInfo.setText("Community features:\n\n" +
-                             "• Join programming communities\n" +
-                             "• Share solutions and discuss problems\n" +
-                             "• Get help from peers and mentors\n" +
-                             "• Participate in coding challenges\n\n" +
-                             "This feature is coming soon!");
-
-        panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(new JScrollPane(communityInfo), BorderLayout.CENTER);
 
         return panel;
     }
@@ -363,10 +395,10 @@ public class StudentDashboard extends JFrame {
 
         for (Problem p : allProblems) {
             boolean matchDiff = "All".equalsIgnoreCase(diffSel) ||
-                p.getDifficulty() != null && p.getDifficulty().name().equalsIgnoreCase(diffSel);
+                    p.getDifficulty() != null && p.getDifficulty().name().equalsIgnoreCase(diffSel);
 
             boolean matchPattern = "All".equalsIgnoreCase(patternSel) ||
-                p.getPattern() != null && p.getPattern().name().equalsIgnoreCase(patternSel);
+                    p.getPattern() != null && p.getPattern().name().equalsIgnoreCase(patternSel);
 
             if (matchDiff && matchPattern) {
                 problemListModel.addElement(p);
@@ -380,32 +412,6 @@ public class StudentDashboard extends JFrame {
             problemDetails.setText("");
             problemDetails.setBorder(BorderFactory.createTitledBorder("Select a problem"));
         }
-    }
-
-    private void loadProblemsToAll() {
-        try {
-            allProblems = problemController.getAllProblems();
-        } catch (Exception e) {
-            allProblems = new ArrayList<>();
-            JOptionPane.showMessageDialog(this, "Error loading problems: " + e.getMessage());
-        }
-        applyFilters();
-    }
-
-    private void showProblemDetails(Problem problem, JTextArea detailsArea) {
-        if (problem == null) {
-            detailsArea.setText("");
-            detailsArea.setBorder(BorderFactory.createTitledBorder("Select a problem"));
-            return;
-        }
-        detailsArea.setBorder(BorderFactory.createTitledBorder("Title: " + problem.getTitle()));
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("\nDifficulty: ").append(problem.getDifficulty()).append("\n");
-        sb.append("Pattern: ").append(problem.getPattern()).append("\n\n");
-        sb.append("Description:\n").append(problem.getDescription() == null ? "" : problem.getDescription());
-
-        detailsArea.setText(sb.toString());
     }
 
     private void loadQuizzes(DefaultListModel<String> listModel) {
@@ -436,6 +442,22 @@ public class StudentDashboard extends JFrame {
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error starting quiz: " + e.getMessage());
         }
+    }
+
+    private void showProblemDetails(Problem problem, JTextArea detailsArea) {
+        if (problem == null) {
+            detailsArea.setText("");
+            detailsArea.setBorder(BorderFactory.createTitledBorder("Select a problem"));
+            return;
+        }
+        detailsArea.setBorder(BorderFactory.createTitledBorder("Title: " + problem.getTitle()));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nDifficulty: ").append(problem.getDifficulty()).append("\n");
+        sb.append("Pattern: ").append(problem.getPattern()).append("\n\n");
+        sb.append("Description:\n").append(problem.getDescription() == null ? "" : problem.getDescription());
+
+        detailsArea.setText(sb.toString());
     }
 
     void updateDashboardStats() {
